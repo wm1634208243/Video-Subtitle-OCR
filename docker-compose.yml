@@ -1,0 +1,24 @@
+services:
+  video-subtitle-ocr:
+    build:
+      context: .
+      args:
+        INSTALL_EASYOCR: "false"
+        INSTALL_OPENVINO: "false"
+        INSTALL_ONNXRUNTIME: "false"
+    image: video-subtitle-ocr:latest
+    container_name: video-subtitle-ocr
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      VSO_WORKERS: "1"
+      VSO_CPU_THREADS: "8"
+      VSO_PADDLE_BATCH_SIZE: "4"
+      VSO_OPENVINO_DEVICE: AUTO
+      VSO_MAX_UPLOAD_MB: "4096"
+      VSO_ALLOW_WEB_INSTALL: "1"
+      PADDLE_PDX_CACHE_HOME: /app/data/models/paddlex
+      PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK: "True"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Video Subtitle OCR</title>
+  <desc id="desc">A rounded video tile with subtitle lines and an OCR scan beam.</desc>
+  <defs>
+    <linearGradient id="bg" x1="96" y1="44" x2="420" y2="468" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f7fbff"/>
+      <stop offset="0.44" stop-color="#ddecff"/>
+      <stop offset="1" stop-color="#7bb4ff"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="104" y1="126" x2="408" y2="386" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1b2433"/>
+      <stop offset="1" stop-color="#0a101a"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="118" y1="154" x2="394" y2="154" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2f86ff" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#69d7ff"/>
+      <stop offset="1" stop-color="#2f86ff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#1b4f9c" flood-opacity="0.26"/>
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0a1220" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <rect x="56" y="40" width="400" height="432" rx="92" fill="url(#bg)"/>
+  <rect x="56" y="40" width="400" height="432" rx="92" fill="none" stroke="#ffffff" stroke-opacity="0.72" stroke-width="8"/>
+
+  <g filter="url(#shadow)">
+    <rect x="104" y="124" width="304" height="244" rx="34" fill="url(#panel)"/>
+    <path d="M104 158c0-18.8 15.2-34 34-34h236c18.8 0 34 15.2 34 34v22H104v-22Z" fill="#263449"/>
+    <circle cx="138" cy="152" r="7" fill="#ff6b6b"/>
+    <circle cx="162" cy="152" r="7" fill="#ffd166"/>
+    <circle cx="186" cy="152" r="7" fill="#6ee7a8"/>
+
+    <path d="M242 223.5c0-8.7 9.5-14.1 17-9.7l55.5 32.4c7.4 4.3 7.4 15.1 0 19.4L259 298c-7.5 4.4-17-1-17-9.7v-64.8Z" fill="#f7fbff" opacity="0.94"/>
+
+    <rect x="130" y="312" width="252" height="10" rx="5" fill="#ffffff" opacity="0.88"/>
+    <rect x="156" y="335" width="200" height="10" rx="5" fill="#ffffff" opacity="0.68"/>
+
+    <rect x="118" y="196" width="276" height="8" rx="4" fill="url(#beam)"/>
+    <rect x="118" y="196" width="276" height="64" rx="8" fill="#57c9ff" opacity="0.08"/>
+  </g>
+
+  <g fill="none" stroke="#0f62d7" stroke-width="12" stroke-linecap="round" opacity="0.88">
+    <path d="M145 407h54"/>
+    <path d="M313 407h54"/>
+    <path d="M199 407c0 15.5 12.5 28 28 28h58c15.5 0 28-12.5 28-28"/>
+  </g>
+</svg>

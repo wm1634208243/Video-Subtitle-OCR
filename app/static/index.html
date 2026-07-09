@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Video Subtitle OCR</title>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/style.css?v=20260709-12" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="workspace">
+        <div class="titlebar">
+          <div>
+            <h1>Video Subtitle OCR</h1>
+            <p>本机视频字幕提取工具。优先导出软字幕，没有软字幕时自动 OCR 硬字幕。</p>
+          </div>
+          <div class="status-pill" id="serviceState">检测中</div>
+        </div>
+
+        <div class="workbench">
+        <form id="uploadForm" class="panel">
+          <label class="dropzone" id="dropzone" for="videoFile" tabindex="0">
+            <input id="videoFile" name="file" type="file" accept="video/*" required />
+            <span class="drop-title" id="fileName">选择、拖入或粘贴视频</span>
+            <span class="drop-subtitle" id="dropHint">支持 MP4、MKV、MOV、WEBM，也可以直接 Ctrl+V 粘贴文件</span>
+          </label>
+
+          <section class="region-panel" id="regionPanel" hidden>
+            <div class="region-head">
+              <div>
+                <h2>识别区域</h2>
+                <p id="regionStatus">先定位到有字幕的画面，再框选字幕区域；不框选则使用智能区域。</p>
+              </div>
+              <div class="region-actions">
+                <button class="secondary compact" id="selectRegionButton" type="button" aria-pressed="false">框选区域</button>
+                <button class="secondary compact" id="useBottomRegion" type="button">底部区域</button>
+                <button class="secondary compact" id="clearRegion" type="button">清除框选</button>
+              </div>
+            </div>
+            <div class="video-region" id="videoRegion">
+              <video id="regionVideo" muted playsinline></video>
+              <div class="selection-layer" id="selectionLayer" aria-hidden="true"></div>
+              <div class="selection-box" id="selectionBox" hidden></div>
+            </div>
+            <div class="preview-controls">
+              <button class="secondary compact" id="previewPlayButton" type="button" disabled>播放</button>
+              <input id="previewSeek" type="range" min="0" max="1000" value="0" step="1" disabled aria-label="视频预览进度" />
+              <span id="previewTime">00:00 / 00:00</span>
+            </div>
+          </section>
+
+          <div class="mode-row">
+            <label>
+              <span>识别模式</span>
+              <select name="mode" id="modeSelect">
+                <option value="balanced" selected>智能均衡</option>
+                <option value="fast">快速预览</option>
+                <option value="accurate">精细识别</option>
+                <option value="manual">手动高级</option>
+              </select>
+            </label>
+            <p id="modeHint">自动分析视频时长、分辨率和字幕区域，适合大多数视频。</p>
+          </div>
+
+          <details class="advanced" id="advancedPanel">
+            <summary>高级参数</summary>
+            <div class="controls">
+              <label>
+                <span>OCR 引擎</span>
+                <select name="engine" id="engineSelect">
+                  <option value="auto" selected>智能选择</option>
+                  <option value="paddle">PaddleOCR</option>
+                  <option value="openvino">OpenVINO OCR</option>
+                  <option value="onnxruntime">ONNXRuntime OCR</option>
+                  <option value="easyocr">EasyOCR</option>
+                  <option value="tesseract">Tesseract</option>
+                </select>
+                <small class="field-hint" id="engineHint">正在检测本机 OCR 引擎</small>
+              </label>
+
+              <label>
+                <span>字幕语言</span>
+                <select name="language" id="languageSelect">
+                  <option value="ch" selected>中英混合</option>
+                  <option value="en">英文优先</option>
+                </select>
+                <small class="field-hint">英文视频选“英文优先”会更轻一些。</small>
+              </label>
+
+              <label>
+                <span>抽帧 FPS</span>
+                <input name="fps" type="number" min="0.1" max="10" step="0.1" value="1.5" />
+              </label>
+
+              <label>
+                <span>底部区域</span>
+                <input name="crop_bottom" type="number" min="0.05" max="1" step="0.05" value="0.55" />
+              </label>
+
+              <label>
+                <span>相似度</span>
+                <input name="similarity" type="number" min="0.1" max="0.98" step="0.01" value="0.72" />
+              </label>
+            </div>
+          </details>
+
+          <details class="advanced installer" id="installerPanel">
+            <summary>引擎安装</summary>
+            <div class="engine-list" id="engineList"></div>
+            <div class="installer-actions">
+              <button class="secondary" type="button" data-install-profile="recommended">安装推荐</button>
+              <button class="secondary" type="button" data-install-profile="full">安装全部</button>
+            </div>
+            <p id="installStatus" class="option-summary">检测到未安装引擎时，可以在这里直接安装。</p>
+            <pre id="installLog" class="install-log" hidden></pre>
+          </details>
+
+          <details class="advanced" id="llmPanel">
+            <summary>大模型纠错（可选）</summary>
+            <div class="controls">
+              <label class="checkbox-field">
+                <input name="llm_correction" id="llmCorrection" type="checkbox" value="true" />
+                <span>启用字幕文本纠错</span>
+                <small class="field-hint">只在 OCR 合并后修正文案，不改时间轴；不配置则完全不调用。</small>
+              </label>
+
+              <label>
+                <span>服务商</span>
+                <select name="llm_provider" id="llmProvider">
+                  <option value="openai">OpenAI</option>
+                  <option value="anthropic">Anthropic</option>
+                  <option value="ollama">Ollama 本地</option>
+                  <option value="openai-compatible">OpenAI 兼容接口</option>
+                </select>
+              </label>
+
+              <label>
+                <span>模型</span>
+                <input name="llm_model" id="llmModel" type="text" placeholder="如 gpt-4.1-mini / claude-3-5-haiku-latest / qwen2.5:7b" />
+              </label>
+
+              <label>
+                <span>Base URL</span>
+                <input name="llm_base_url" id="llmBaseUrl" type="text" placeholder="可留空使用默认地址" />
+              </label>
+
+              <label>
+                <span>API Key</span>
+                <input name="llm_api_key" id="llmApiKey" type="password" autocomplete="off" placeholder="Ollama 本地可留空" />
+              </label>
+            </div>
+            <div class="config-actions">
+              <button class="secondary compact" id="testLlmConfig" type="button">测试连接</button>
+              <button class="secondary compact" id="saveLlmConfig" type="button">保存配置</button>
+              <button class="secondary compact danger" id="resetLlmConfig" type="button">重置配置</button>
+              <span id="llmConfigStatus" class="config-status">未测试</span>
+            </div>
+          </details>
+
+          <button class="primary" id="submitButton" type="submit">开始识别</button>
+        </form>
+
+        <section class="panel result-panel" id="resultPanel">
+          <div class="result-head">
+            <div>
+              <h2 id="jobTitle">等待任务</h2>
+              <p id="jobMessage">任务创建后会显示进度。</p>
+              <p id="jobOptions" class="option-summary"></p>
+            </div>
+            <span id="jobStatus" class="status-pill">排队中</span>
+          </div>
+          <div class="progress-track">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <div class="actions">
+            <a id="downloadSrt" class="secondary disabled" href="#">下载 SRT</a>
+            <a id="downloadTxt" class="secondary disabled" href="#">下载 TXT</a>
+            <button id="cancelJob" class="secondary danger" type="button" disabled>停止识别</button>
+          </div>
+          <section class="ocr-log-panel" id="ocrLogPanel" hidden>
+            <div class="log-head">
+              <h2>OCR 日志</h2>
+              <span id="ocrLogCount">0 条</span>
+            </div>
+            <div class="ocr-log-rows" id="ocrLogRows"></div>
+          </section>
+          <pre id="errorBox" class="error-box" hidden></pre>
+        </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js?v=20260709-12"></script>
+  </body>
+</html>

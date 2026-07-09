@@ -1,0 +1,2 @@
+-r requirements-easyocr.txt
+-r requirements-tesseract.txt

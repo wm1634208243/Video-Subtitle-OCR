@@ -1,0 +1,2 @@
+rapidocr-openvino
+openvino

@@ -695,8 +695,13 @@ button.secondary:disabled {
   }
 
   form.panel,
-  .result-panel {
+  .side-panel {
     height: 100%;
+    min-height: 0;
+  }
+
+  .result-panel, .history-panel {
+    flex: 1 1 50%;
     min-height: 0;
   }
 
@@ -852,7 +857,8 @@ button.secondary:disabled {
 
 .history-panel {
   padding: 18px;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 14px;
 }
 
@@ -861,6 +867,7 @@ button.secondary:disabled {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  flex: 0 0 auto;
 }
 
 .history-count {
@@ -869,8 +876,12 @@ button.secondary:disabled {
 }
 
 .history-list {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .history-item {

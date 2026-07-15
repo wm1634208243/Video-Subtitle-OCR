@@ -60,6 +60,7 @@ job_queue: queue.Queue[JobRecord] = queue.Queue()
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     ensure_data_dirs()
+    store.load_from_disk(JOBS_DIR)
     for index in range(WORKER_COUNT):
         worker = threading.Thread(target=_worker_loop, name=f"ocr-worker-{index + 1}", daemon=True)
         worker.start()
@@ -265,6 +266,12 @@ async def create_job(
     store.add(record)
     job_queue.put(record)
     return store.to_info(record)
+
+
+@app.get("/api/jobs", response_model=list[JobInfo])
+def list_jobs(limit: int = 30) -> list[JobInfo]:
+    limit = min(max(limit, 1), 100)
+    return [store.to_info(job) for job in store.list_recent(limit)]
 
 
 @app.get("/api/jobs/{job_id}", response_model=JobInfo)

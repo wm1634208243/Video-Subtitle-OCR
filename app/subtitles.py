@@ -84,7 +84,7 @@ def merge_ocr_results(
     if current:
         entries.append(current)
 
-    return _drop_contained_fragments(entries)
+    return _merge_consecutive_identical(_drop_contained_fragments(entries))
 
 
 def _drop_contained_fragments(entries: list[SubtitleEntry]) -> list[SubtitleEntry]:
@@ -102,6 +102,25 @@ def _drop_contained_fragments(entries: list[SubtitleEntry]) -> list[SubtitleEntr
             continue
         filtered.append(entry)
     return filtered
+
+
+def _merge_consecutive_identical(
+    entries: list[SubtitleEntry],
+    max_gap: float = 0.5,
+) -> list[SubtitleEntry]:
+    """合并相邻且文本完全一致的字幕条目。
+    当跳帧检测把同一句字幕切成两段相邻记录时，合并成一条并延长结束时间。"""
+    if not entries:
+        return entries
+    merged: list[SubtitleEntry] = [entries[0]]
+    for entry in entries[1:]:
+        prev = merged[-1]
+        gap = entry.start - prev.end
+        if normalize(entry.text) == normalize(prev.text) and gap <= max_gap:
+            prev.end = entry.end
+        else:
+            merged.append(entry)
+    return merged
 
 
 def srt_timestamp(seconds: float) -> str:

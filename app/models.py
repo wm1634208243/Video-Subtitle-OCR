@@ -52,6 +52,7 @@ class JobInfo(BaseModel):
     phase: str = "queued"
     message: str = ""
     error: str | None = None
+    created_at: float = 0.0
     srt_url: str | None = None
     txt_url: str | None = None
     preview_url: str | None = None

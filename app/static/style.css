@@ -840,3 +840,95 @@ button.secondary:disabled {
     flex-direction: column;
   }
 }
+
+/* ── 历史任务面板 ── */
+
+.history-panel {
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.history-count {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.history-list {
+  display: grid;
+  gap: 8px;
+}
+
+.history-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-strong);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.history-item:hover {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(32, 38, 48, 0.22);
+}
+
+.history-item-meta {
+  min-width: 0;
+}
+
+.history-item-name {
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-item-time {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.history-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.history-item-actions a,
+.history-item-actions span {
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--accent);
+  background: transparent;
+  transition: background 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+
+.history-item-actions a:hover {
+  background: rgba(22, 119, 255, 0.07);
+  border-color: var(--accent);
+}
+
+.history-item-actions .status-pill {
+  border: none;
+  font-size: 12px;
+  padding: 3px 9px;
+}
+

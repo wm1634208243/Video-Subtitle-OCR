@@ -33,6 +33,10 @@ ALLOWED_VIDEO_SUFFIXES = {
     ".webm",
     ".m4v",
     ".ts",
+    ".flv",
+    ".wmv",
+    ".3gp",
+    ".rmvb",
 }
 
 

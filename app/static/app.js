@@ -48,6 +48,9 @@ const testLlmConfigButton = document.querySelector("#testLlmConfig");
 const saveLlmConfigButton = document.querySelector("#saveLlmConfig");
 const resetLlmConfigButton = document.querySelector("#resetLlmConfig");
 const llmConfigStatus = document.querySelector("#llmConfigStatus");
+const historyPanel = document.querySelector("#historyPanel");
+const historyList = document.querySelector("#historyList");
+const historyCount = document.querySelector("#historyCount");
 
 const modeHints = {
   balanced: "自动分析视频时长、分辨率和字幕区域，适合大多数视频。",
@@ -345,6 +348,7 @@ form.addEventListener("submit", async (event) => {
 async function initApp() {
   updateLlmDefaults();
   await Promise.all([refreshHealth(), refreshInstallProfiles(), refreshEngines(), pollInstallOnce(), loadLlmConfig()]);
+  await loadHistory();
 }
 
 async function loadLlmConfig() {
@@ -562,6 +566,7 @@ async function pollJob(id) {
       submitButton.disabled = false;
       cancelJobButton.disabled = true;
       setServiceState(payload.status === "done" ? "完成" : payload.status === "canceled" ? "已停止" : "失败", payload.status === "done" ? "success" : "error");
+      loadHistory();
     }
   } catch (error) {
     clearInterval(pollTimer);
@@ -1047,4 +1052,93 @@ function formatResourcePlan(health) {
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+async function loadHistory() {
+  try {
+    const response = await fetch("/api/jobs?limit=30");
+    if (!response.ok) return;
+    const jobs = await response.json();
+    renderHistory(jobs);
+  } catch {
+    // 历史记录加载失败不影响主流程。
+  }
+}
+
+function renderHistory(jobs) {
+  if (!historyPanel || !historyList || !historyCount) return;
+  // 过滤掉当前正在展示的任务（进行中的），只展示已结束的
+  const finished = jobs.filter((j) => ["done", "failed", "canceled"].includes(j.status));
+  if (finished.length === 0) {
+    historyPanel.hidden = true;
+    return;
+  }
+  historyPanel.hidden = false;
+  historyCount.textContent = `共 ${finished.length} 条`;
+  historyList.textContent = "";
+
+  for (const job of finished) {
+    const item = document.createElement("div");
+    item.className = "history-item";
+
+    // 左侧：文件名 + 时间
+    const meta = document.createElement("div");
+    meta.className = "history-item-meta";
+
+    const name = document.createElement("div");
+    name.className = "history-item-name";
+    name.textContent = job.filename || "未知文件";
+    name.title = job.filename || "";
+
+    const timeEl = document.createElement("div");
+    timeEl.className = "history-item-time";
+    const timeStr = job.created_at ? formatRelativeTime(job.created_at * 1000) : "";
+    const msgStr = job.message ? ` · ${job.message}` : "";
+    timeEl.textContent = timeStr + msgStr;
+
+    meta.append(name, timeEl);
+
+    // 右侧：状态 + 操作链接
+    const actions = document.createElement("div");
+    actions.className = "history-item-actions";
+
+    const pill = document.createElement("span");
+    pill.className = "status-pill";
+    const toneMap = { done: "success", failed: "error", canceled: "neutral" };
+    pill.dataset.tone = toneMap[job.status] || "neutral";
+    const statusLabels = { queued: "排队中", running: "进行中", done: "完成", failed: "失败", canceled: "已停止" };
+    pill.textContent = statusLabels[job.status] || job.status;
+    actions.append(pill);
+
+    if (job.srt_url) {
+      const srtLink = document.createElement("a");
+      srtLink.href = job.srt_url;
+      srtLink.textContent = "SRT";
+      srtLink.download = "";
+      actions.append(srtLink);
+    }
+    if (job.txt_url) {
+      const txtLink = document.createElement("a");
+      txtLink.href = job.txt_url;
+      txtLink.textContent = "TXT";
+      txtLink.download = "";
+      actions.append(txtLink);
+    }
+
+    item.append(meta, actions);
+    historyList.append(item);
+  }
+}
+
+function formatRelativeTime(timestampMs) {
+  const diffSec = Math.round((Date.now() - timestampMs) / 1000);
+  if (diffSec < 5) return "刚刚";
+  if (diffSec < 60) return `${diffSec} 秒前`;
+  const diffMin = Math.round(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} 分钟前`;
+  const diffHour = Math.round(diffMin / 60);
+  if (diffHour < 24) return `${diffHour} 小时前`;
+  const diffDay = Math.round(diffHour / 24);
+  if (diffDay < 30) return `${diffDay} 天前`;
+  return new Date(timestampMs).toLocaleDateString("zh-CN");
 }

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Video Subtitle OCR</title>
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/style.css?v=20260715-15" />
+    <link rel="stylesheet" href="/style.css?v=20260715-19" />
   </head>
   <body>
     <main class="shell">
@@ -189,17 +189,22 @@
           <pre id="errorBox" class="error-box" hidden></pre>
         </section>
 
-        <section class="history-panel panel" id="historyPanel" hidden>
+        <section class="history-panel panel" id="historyPanel">
           <div class="history-head">
             <h2>历史任务</h2>
-            <span class="history-count" id="historyCount"></span>
+            <div class="history-head-right" style="display: flex; align-items: center; gap: 12px;">
+              <span class="history-count" id="historyCount"></span>
+              <button class="secondary compact danger" id="clearHistory" type="button" style="display: none;">清空</button>
+            </div>
           </div>
-          <div class="history-list" id="historyList"></div>
+          <div class="history-list" id="historyList">
+            <div style="text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px;">加载中...</div>
+          </div>
         </section>
         </div>
       </section>
     </main>
 
-    <script src="/app.js?v=20260715-14"></script>
+    <script src="/app.js?v=20260715-18"></script>
   </body>
 </html>

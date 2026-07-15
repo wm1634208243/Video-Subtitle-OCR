@@ -91,6 +91,8 @@ p {
 }
 
 .panel {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
@@ -583,6 +585,8 @@ button.secondary:disabled {
 }
 
 .ocr-log-panel {
+  display: flex;
+  flex-direction: column;
   margin-top: 18px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -690,6 +694,7 @@ button.secondary:disabled {
   }
 
   .workbench {
+    height: 100%;
     grid-template-columns: minmax(520px, 1.08fr) minmax(420px, 0.92fr);
     align-items: stretch;
   }
@@ -752,6 +757,17 @@ button.secondary:disabled {
     aspect-ratio: auto;
   }
 
+  .ocr-log-panel {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .ocr-log-rows {
+    max-height: none;
+    flex: 1;
+    min-height: 0;
+  }
+
   .mode-row {
     grid-template-columns: minmax(180px, 240px) 1fr;
     gap: 10px;
@@ -806,7 +822,7 @@ button.secondary:disabled {
   .ocr-log-rows {
     flex: 1 1 auto;
     max-height: none;
-    min-height: 160px;
+    min-height: 0;
   }
 }
 

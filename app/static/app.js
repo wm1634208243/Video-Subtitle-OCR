@@ -51,6 +51,7 @@ const llmConfigStatus = document.querySelector("#llmConfigStatus");
 const historyPanel = document.querySelector("#historyPanel");
 const historyList = document.querySelector("#historyList");
 const historyCount = document.querySelector("#historyCount");
+const clearHistoryBtn = document.querySelector("#clearHistory");
 
 const modeHints = {
   balanced: "自动分析视频时长、分辨率和字幕区域，适合大多数视频。",
@@ -119,6 +120,7 @@ llmProvider?.addEventListener("change", updateLlmDefaults);
 testLlmConfigButton?.addEventListener("click", testLlmConfig);
 saveLlmConfigButton?.addEventListener("click", saveLlmConfig);
 resetLlmConfigButton?.addEventListener("click", resetLlmConfig);
+clearHistoryBtn?.addEventListener("click", clearHistory);
 
 document.addEventListener("click", (event) => {
   const button = event.target.closest("[data-install-profile]");
@@ -347,8 +349,14 @@ form.addEventListener("submit", async (event) => {
 
 async function initApp() {
   updateLlmDefaults();
-  await Promise.all([refreshHealth(), refreshInstallProfiles(), refreshEngines(), pollInstallOnce(), loadLlmConfig()]);
-  await loadHistory();
+  await Promise.all([
+    refreshHealth(),
+    refreshInstallProfiles(),
+    refreshEngines(),
+    pollInstallOnce(),
+    loadLlmConfig(),
+    loadHistory(),
+  ]);
 }
 
 async function loadLlmConfig() {
@@ -980,13 +988,21 @@ function formatOptions(options) {
 }
 
 function renderOcrLog(rows, total) {
-  ocrLogPanel.hidden = rows.length === 0;
+  ocrLogCount.textContent = `${total} 条`;
+  ocrLogPanel.hidden = false;
+  ocrLogRows.innerHTML = "";
+  
+  if (rows.length === 0) {
+    ocrLogRows.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 30px 0; font-size: 13px;">暂无日志</div>';
+    return;
+  }
+  
   const reused = rows.filter((row) => row.reused).length;
   const empty = rows.filter((row) => row.empty).length;
   const reviewed = rows.filter((row) => row.reviewed).length;
   const suffix = rows.length ? ` · 近 ${rows.length} 条里复核 ${reviewed}，复用 ${reused}，空帧 ${empty}` : "";
   ocrLogCount.textContent = `${total} 条${suffix}`;
-  ocrLogRows.textContent = "";
+  
   for (const row of rows) {
     const item = document.createElement("div");
     item.className = `ocr-log-row ${row.empty ? "empty" : ""}`;
@@ -1011,8 +1027,8 @@ function renderOcrLog(rows, total) {
 }
 
 function clearLogPanel() {
-  ocrLogPanel.hidden = true;
-  ocrLogRows.textContent = "";
+  ocrLogPanel.hidden = false;
+  ocrLogRows.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 30px 0; font-size: 13px;">暂无日志</div>';
   ocrLogCount.textContent = "0 条";
 }
 
@@ -1070,11 +1086,15 @@ function renderHistory(jobs) {
   // 过滤掉当前正在展示的任务（进行中的），只展示已结束的
   const finished = jobs.filter((j) => ["done", "failed", "canceled"].includes(j.status));
   if (finished.length === 0) {
-    historyPanel.hidden = true;
+    historyPanel.hidden = false;
+    historyCount.textContent = "共 0 条";
+    clearHistoryBtn.style.display = "none";
+    historyList.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px;">暂无历史任务</div>';
     return;
   }
   historyPanel.hidden = false;
   historyCount.textContent = `共 ${finished.length} 条`;
+  clearHistoryBtn.style.display = "inline-flex";
   historyList.textContent = "";
 
   for (const job of finished) {
@@ -1141,4 +1161,17 @@ function formatRelativeTime(timestampMs) {
   const diffDay = Math.round(diffHour / 24);
   if (diffDay < 30) return `${diffDay} 天前`;
   return new Date(timestampMs).toLocaleDateString("zh-CN");
+}
+
+async function clearHistory() {
+  if (!confirm("确定要清空所有历史任务并释放空间吗？\n（该操作不可逆，所有历史识别结果文件将被彻底删除）")) {
+    return;
+  }
+  try {
+    const response = await fetch("/api/jobs", { method: "DELETE" });
+    if (!response.ok) throw new Error("清空失败");
+    await loadHistory();
+  } catch (error) {
+    alert(error.message);
+  }
 }

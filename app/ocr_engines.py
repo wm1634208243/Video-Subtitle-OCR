@@ -187,9 +187,9 @@ def get_engine_status(engine_id: str) -> EngineStatus:
             name="PaddleOCR",
             available=not missing,
             default=True,
-            description="Recommended CPU engine with the best balance for Chinese/English subtitles.",
+            description="推荐使用的 CPU 引擎，在中英文字幕识别上效果和速度平衡最好。",
             reason=_missing_reason(missing),
-            install_hint="Use the web installer or run install.bat and choose Recommended.",
+            install_hint="请使用安装包或运行 install.bat 选择 Recommended 进行安装。",
         )
     if engine_id == "easyocr":
         missing = _missing_modules("easyocr")
@@ -197,9 +197,9 @@ def get_engine_status(engine_id: str) -> EngineStatus:
             id="easyocr",
             name="EasyOCR",
             available=not missing,
-            description="Optional OCR engine. It is easy to try but pulls PyTorch and is usually heavier on CPU.",
+            description="可选的 OCR 引擎。安装方便，但依赖 PyTorch，且通常比较吃 CPU 性能。",
             reason=_missing_reason(missing),
-            install_hint="Use the web installer or run install.bat and choose EasyOCR.",
+            install_hint="请使用安装包或运行 install.bat 选择 EasyOCR 进行安装。",
         )
     if engine_id == "openvino":
         missing = _missing_modules("rapidocr_openvino", "openvino")
@@ -210,12 +210,12 @@ def get_engine_status(engine_id: str) -> EngineStatus:
             name="OpenVINO OCR",
             available=not missing and import_error is None,
             description=(
-                "Fast RapidOCR/OpenVINO backend for Intel acceleration. "
-                "AUTO device mode can use GPU/NPU/CPU when available. "
-                f"{device_hint}Use PaddleOCR when accuracy matters most."
+                "基于 Intel 硬件加速的超快 RapidOCR 引擎。"
+                "支持自动调度 GPU/NPU/CPU 进行推理。"
+                f"{device_hint}如果不追求极限速度而更看重准确率，建议使用 PaddleOCR。"
             ),
             reason=_missing_reason(missing) or import_error,
-            install_hint="Use the web installer or run install.bat and choose OpenVINO.",
+            install_hint="请使用安装包或运行 install.bat 选择 OpenVINO 进行安装。",
         )
     if engine_id == "onnxruntime":
         missing = _missing_modules("rapidocr_onnxruntime", "onnxruntime")
@@ -224,9 +224,9 @@ def get_engine_status(engine_id: str) -> EngineStatus:
             id="onnxruntime",
             name="ONNXRuntime OCR",
             available=not missing and import_error is None,
-            description="Fast RapidOCR/ONNXRuntime CPU backend. Use PaddleOCR when accuracy matters most.",
+            description="基于 ONNXRuntime 的快速 CPU 引擎。如果不追求极限速度而更看重准确率，建议使用 PaddleOCR。",
             reason=_missing_reason(missing) or import_error,
-            install_hint="Use the web installer or run install.bat and choose ONNXRuntime.",
+            install_hint="请使用安装包或运行 install.bat 选择 ONNXRuntime 进行安装。",
         )
     if engine_id == "tesseract":
         missing = _missing_modules("pytesseract")
@@ -239,9 +239,9 @@ def get_engine_status(engine_id: str) -> EngineStatus:
             id="tesseract",
             name="Tesseract",
             available=not missing and not binary_missing,
-            description="Optional lightweight wrapper around the system Tesseract OCR executable.",
+            description="轻量级引擎，需要系统安装并配置好 Tesseract OCR 运行环境。",
             reason=reason,
-            install_hint="Use the web installer or run install.bat and choose Tesseract.",
+            install_hint="请使用安装包或运行 install.bat 选择 Tesseract 进行安装。",
         )
     raise OcrEngineError(f"Unknown OCR engine: {engine_id}")
 

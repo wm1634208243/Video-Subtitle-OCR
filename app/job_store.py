@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import threading
+import shutil
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -98,6 +99,25 @@ class JobStore:
         with self._lock:
             jobs = sorted(self._jobs.values(), key=lambda j: j.created_at, reverse=True)
             return jobs[:limit]
+
+    def clear_history(self) -> int:
+        """Clear all finished/failed jobs and delete their data folders to free up space."""
+        cleared_count = 0
+        with self._lock:
+            to_delete = [
+                job_id for job_id, job in self._jobs.items()
+                if job.status in (JobStatus.done.value, JobStatus.failed.value, JobStatus.canceled.value)
+            ]
+            for job_id in to_delete:
+                job = self._jobs.pop(job_id)
+                try:
+                    job_dir = Path(job.job_dir)
+                    if job_dir.exists():
+                        shutil.rmtree(job_dir, ignore_errors=True)
+                except Exception:
+                    pass
+                cleared_count += 1
+        return cleared_count
 
     def update(self, job_id: str, **changes: Any) -> None:
         with self._lock:

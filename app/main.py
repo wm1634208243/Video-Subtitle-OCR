@@ -274,6 +274,12 @@ def list_jobs(limit: int = 30) -> list[JobInfo]:
     return [store.to_info(job) for job in store.list_recent(limit)]
 
 
+@app.delete("/api/jobs")
+def clear_jobs_history() -> dict[str, Any]:
+    count = store.clear_history()
+    return {"status": "ok", "cleared": count}
+
+
 @app.get("/api/jobs/{job_id}", response_model=JobInfo)
 def get_job(job_id: str) -> JobInfo:
     job = store.get(job_id)

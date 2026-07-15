@@ -4,6 +4,8 @@
 
 处理流程会优先检查视频里是否有可直接导出的文字软字幕；如果没有，再用 FFmpeg 抽帧、OpenCV 预处理、OCR 识别硬字幕。
 
+![Video Subtitle OCR UI](docs/images/screenshot_main.png)
+
 ## Features
 
 - 单服务运行：FastAPI 后端和静态前端由同一个进程提供。
@@ -591,6 +593,12 @@ Docker 下可以用 `docker compose down` 停止容器。`./data` 目录会保�
 docker compose build --build-arg INSTALL_EASYOCR=true
 docker compose up
 ```
+
+## 致谢
+
+感谢真诚、友善、团结、专业的 [LinuxDo](https://linux.do) 社区，让我学到很多开发和 AI 相关的知识和玩法。
+
+[LinuxDo](https://linux.do) - 学 AI，上 L 站。
 
 ## License
 

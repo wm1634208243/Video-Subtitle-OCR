@@ -74,6 +74,8 @@ class JobStore:
                         json.dumps({k: v for k, v in data.items()}, ensure_ascii=False, indent=2),
                         encoding="utf-8",
                     )
+                if "created_at" not in data:
+                    data["created_at"] = job_json.stat().st_mtime
                 record = JobRecord(**{k: v for k, v in data.items() if k in _RECORD_FIELDS})
                 with self._lock:
                     self._jobs[record.id] = record

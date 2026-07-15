@@ -52,6 +52,13 @@ select {
   min-height: 0;
 }
 
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 0;
+}
+
 .titlebar {
   display: flex;
   align-items: flex-end;
